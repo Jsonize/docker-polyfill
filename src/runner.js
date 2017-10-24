@@ -99,6 +99,9 @@ module.exports = {
         source.stderr.pipe(target.stderr);
         source.stdout.pipe(target.stdout);
         target.stdin.pipe(source.stdin);
+        target.stdin.on("end", function () {
+            source.stdin.emit("end");
+        });
         source.on("close", function (status) {
             target.exit(status);
         });

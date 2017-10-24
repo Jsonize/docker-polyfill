@@ -24,13 +24,17 @@ module.exports = {
                         stdout += data.toString();
                     });
                     file.on("close", function (status) {
-                        const result = JSON.stringify({
-                            status: status,
-                            stderr: stderr,
-                            stdout: stdout
-                        });
-                        console.log(result);
-                        socket.write(result);
+                        try {
+                            const result = JSON.stringify({
+                                status: status,
+                                stderr: stderr,
+                                stdout: stdout
+                            });
+                            console.log(result);
+                            socket.end(result);
+                        } catch (e) {
+                            console.log(e);
+                        }
                     });
                 } catch (e) {
                     console.log(e);

@@ -1,5 +1,5 @@
 #!/usr/local/bin/node
 
-const Runner = require(__dirname + "/../src/runner.js");
+const Server = require(__dirname + "/../src/server.js");
 
-Runner.runServer(process.argv[2]);
+Server.runServer(process.argv[2]);
