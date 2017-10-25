@@ -6,6 +6,8 @@ const ChildProcess = require("child_process");
 module.exports = {
 
     polyfillRun: function (options) {
+        if (options.docker && typeof options.docker === "string")
+            options.docker = {container: options.docker};
         if (options.docker) {
             options.docker.command = options.command;
             options.docker.argv = options.argv;
@@ -15,7 +17,7 @@ module.exports = {
     },
 
     nodockerRun: function (options) {
-        return ClientProcess.spawn(options.command, options.argv);
+        return ChildProcess.spawn(options.command, options.argv);
     },
 
     dockerRun: function (options) {

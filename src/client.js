@@ -26,6 +26,7 @@ const createPseudoProcess = function () {
 module.exports = {
 
     run: function (proxy, data) {
+        var myData = BetaJS.Objs.clone(data, 1);
         const clientProcess = createPseudoProcess();
         const socket = new Net.Socket();
         const components = proxy.split(":");
@@ -44,7 +45,7 @@ module.exports = {
             clearTimeout(timeout);
             socket.connect(parseInt(components[1], 10), components[0], function() {
                 socket.write(JSON.stringify({
-                    data: data,
+                    data: myData,
                     stdin: stdin
                 }));
                 var resultData = "";
