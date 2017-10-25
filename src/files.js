@@ -4,12 +4,12 @@ const Path = require("path");
 const ChildProcess = require("child_process");
 
 const chmod = function (mods, filename) {
-    console.log("chmod " + mods + " " + filename);
+    // console.log("chmod " + mods + " " + filename);
     ChildProcess.exec("chmod " + mods + " " + filename);
 };
 
 const chown = function (owner, filename) {
-    console.log("chown " + owner + " " + filename);
+    // console.log("chown " + owner + " " + filename);
     ChildProcess.exec("chown " + owner + " " + filename);
 };
 
@@ -29,25 +29,44 @@ module.exports = {
     },
 
     analyzeFiles: function (files) {
-        var mappings = {};
+        var mountMap = {};
+        files.forEach(function (filename) {
+            const originalDirectory = Path.dirname(Path.resolve(filename));
+            mountMap[originalDirectory] = originalDirectory;
+        });
+        for (var sub in mountMap)
+            for (var root in mountMap)
+                if (root.length < mountMap[sub].length && sub.indexOf(root) === 0 && sub.charAt(root.length) === "/")
+                    mountMap[sub] = root;
         var mounts = {};
+        var idx = 0;
+        for (sub in mountMap) {
+            root = mountMap[sub];
+            if (mounts[root])
+                continue;
+            mounts[root] = "/dockermounts-" + idx;
+            idx++;
+        }
+        var mappings = {};
         files.forEach(function (filename, index) {
             const originalFullName = Path.resolve(filename);
             const baseName = Path.basename(filename);
-            const originalDirectory = Path.dirname(filename);
+            const originalDirectory = Path.dirname(originalFullName);
             const exists = FS.existsSync(originalFullName);
             const dirExists = FS.existsSync(originalDirectory);
             const stats = exists ? FS.lstatSync(originalFullName) : {};
+            const directoryStats = dirExists ? FS.lstatSync(originalDirectory) : {};
             const isFile = exists && stats.isFile();
             const isDirectory = exists && stats.isDirectory();
-            const mountSource = originalDirectory;
-            const mountTarget = mounts[mountSource] || ("/dockermounts-" + index);
-            const mountFullName = mountTarget + "/" + baseName;
+            const mountSource = mountMap[originalDirectory];
+            const mountTarget = mounts[mountSource];
+            const mountFullName = mountTarget + originalDirectory.substring(mountSource.length) + "/" + baseName;
             mappings[filename] = {
                 index: index,
                 originalName: filename,
                 originalFullName: originalFullName,
                 originalStats: stats,
+                originalDirectoryStats: directoryStats,
                 baseName: baseName,
                 originalDirectory: originalDirectory,
                 exists: exists,
@@ -90,15 +109,18 @@ module.exports = {
     ensureOriginalDirectoryExistence: function (files) {
         for (var fileKey in files) {
             const file = files[fileKey];
+            // console.log("Check", file);
             if (file.exists || file.dirExists)
-                return;
+                continue;
             // extract all directory tokens into array, reconstruct path and work our way through it
             const dirs = file.originalDirectory.split("/");
             var currentDir = "";
             dirs.forEach(function (dir) {
                 currentDir += "/" + dir;
-                if (!FS.existsSync(currentDir))
+                if (!FS.existsSync(currentDir)) {
+                    // console.log("Create Directory", currentDir);
                     FS.mkdirSync(currentDir);
+                }
             });
         }
     },
@@ -107,9 +129,9 @@ module.exports = {
         var owns = {};
         for (var fileKey in files) {
             const file = files[fileKey];
-            if (!file.exists)
-                continue;
-            owns[file.originalFullName] = file.originalStats.uid;
+            if (file.exists)
+                owns[file.originalFullName] = file.originalStats.uid;
+            owns[file.originalDirectory] = file.originalDirectoryStats.uid;
         }
         return owns;
     },
@@ -118,11 +140,15 @@ module.exports = {
         var mods = {};
         for (var fileKey in files) {
             const file = files[fileKey];
-            if (!file.exists)
-                continue;
-            const m = file.originalStats.mode;
-            const mode = ((m >> 6) & 7) * 100 + ((m >> 3) & 7) * 10 + ((m >> 0) & 7) * 1;
-            mods[file.originalFullName] = mode;
+            if (file.exists) {
+                var m = file.originalStats.mode;
+                var mode = ((m >> 6) & 7) * 100 + ((m >> 3) & 7) * 10 + ((m >> 0) & 7) * 1;
+                mods[file.originalFullName] = mode;
+            }
+            /*
+            var m = file.originalDirectoryStats.mode;
+            var mode = ((m >> 6) & 7) * 100 + ((m >> 3) & 7) * 10 + ((m >> 0) & 7) * 1;
+            mods[file.originalDirectory] = mode;*/
         }
         return mods;
     },
@@ -142,14 +168,18 @@ module.exports = {
     changeOwns: function (files, owner) {
         for (var fileKey in files) {
             const file = files[fileKey];
-            chown(owner, file.originalFullName);
+            //if (file.exists)
+                chown(owner, file.originalFullName);
+            chown(owner, file.originalDirectory);
         }
     },
 
     changeMods: function (files, mods) {
         for (var fileKey in files) {
             const file = files[fileKey];
-            chmod(mods, file.originalFullName);
+            //if (file.exists)
+                chmod(mods, file.originalFullName);
+            //chmod(mods, file.originalDirectory);
         }
     }
 

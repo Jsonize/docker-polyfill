@@ -38,7 +38,7 @@ module.exports = {
             argv = argv.map(function (arg) {
                 for (var replaceFrom in options.replaceArguments) {
                     const replaceTo = options.replaceArguments[replaceFrom];
-                    arg = arg.replace(replaceFrom, replaceTo);
+                    arg = arg.replace(new RegExp(replaceFrom, "g"), replaceTo);
                 }
                 return arg;
             });
