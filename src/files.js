@@ -89,7 +89,7 @@ module.exports = {
         return args.map(function (arg) {
             var result = arg;
             for (var fileKey in files) {
-                const file = files[fileKey];
+                var file = files[fileKey];
                 result = result.replace(file.originalName, file.mountFullName);
             }
             return result;
@@ -99,7 +99,7 @@ module.exports = {
     generateMountParameters: function (mounts) {
         var result = [];
         for (var mountSource in mounts) {
-            const mountTarget = mounts[mountSource];
+            var mountTarget = mounts[mountSource];
             result.push("-v");
             result.push(mountSource + ":" + mountTarget + ":rw");
         }
@@ -108,12 +108,12 @@ module.exports = {
 
     ensureOriginalDirectoryExistence: function (files) {
         for (var fileKey in files) {
-            const file = files[fileKey];
+            var file = files[fileKey];
             // console.log("Check", file);
             if (file.exists || file.dirExists)
                 continue;
             // extract all directory tokens into array, reconstruct path and work our way through it
-            const dirs = file.originalDirectory.split("/");
+            var dirs = file.originalDirectory.split("/");
             var currentDir = "";
             dirs.forEach(function (dir) {
                 currentDir += "/" + dir;
@@ -128,7 +128,7 @@ module.exports = {
     extractOwns: function (files) {
         var owns = {};
         for (var fileKey in files) {
-            const file = files[fileKey];
+            var file = files[fileKey];
             if (file.exists)
                 owns[file.originalFullName] = file.originalStats.uid;
             owns[file.originalDirectory] = file.originalDirectoryStats.uid;
@@ -139,7 +139,7 @@ module.exports = {
     extractMods: function (files) {
         var mods = {};
         for (var fileKey in files) {
-            const file = files[fileKey];
+            var file = files[fileKey];
             if (file.exists) {
                 var m = file.originalStats.mode;
                 var mode = ((m >> 6) & 7) * 100 + ((m >> 3) & 7) * 10 + ((m >> 0) & 7) * 1;
@@ -167,7 +167,7 @@ module.exports = {
 
     changeOwns: function (files, owner) {
         for (var fileKey in files) {
-            const file = files[fileKey];
+            var file = files[fileKey];
             //if (file.exists)
                 chown(owner, file.originalFullName);
             chown(owner, file.originalDirectory);
@@ -176,7 +176,7 @@ module.exports = {
 
     changeMods: function (files, mods) {
         for (var fileKey in files) {
-            const file = files[fileKey];
+            var file = files[fileKey];
             //if (file.exists)
                 chmod(mods, file.originalFullName);
             //chmod(mods, file.originalDirectory);

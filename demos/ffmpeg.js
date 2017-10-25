@@ -1,4 +1,4 @@
-#!/usr/local/bin/node
+#!/usr/bin/node
 
 const Runner = require(__dirname + "/../src/runner.js");
 
