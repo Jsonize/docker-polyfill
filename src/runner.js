@@ -56,7 +56,7 @@ module.exports = {
         // generate docker mount parameters
         const mountParameters = Files.generateMountParameters(fileMounts);
         // generate command line
-        var dockerArgs = ["run"];
+        var dockerArgs = ["run", "--rm"];
         dockerArgs = dockerArgs.concat(mountParameters);
         if (command) {
             dockerArgs.push("--entrypoint");
