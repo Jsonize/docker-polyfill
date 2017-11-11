@@ -26,7 +26,10 @@ const createPseudoProcess = function () {
 module.exports = {
 
     run: function (proxy, data) {
-        var myData = BetaJS.Objs.clone(data, 1);
+        data = data || {};
+        var myData = {};
+        for (var key in data)
+            myData[key] = data[key];
         const clientProcess = createPseudoProcess();
         const socket = new Net.Socket();
         const components = proxy.split(":");
