@@ -1,7 +1,7 @@
 {
 	"name": "docker-polyfill",
 	"description": "A general polyfill for docker command execution",
-	"version": "0.0.7",
+	"version": "0.0.8",
 	"author": "Ziggeo",
 	"repository": "https://github.com/jsonize/docker-polyfill",
 	"license": "Apache-2.0",

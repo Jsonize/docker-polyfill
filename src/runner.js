@@ -8,12 +8,22 @@ module.exports = {
     polyfillRun: function (options) {
         if (options.docker && typeof options.docker === "string")
             options.docker = {container: options.docker};
+        var process;
         if (options.docker) {
             options.docker.command = options.command;
             options.docker.argv = options.argv;
-            return this.dockerRun(options.docker);
+            process = this.dockerRun(options.docker);
         } else
-            return this.nodockerRun(options);
+            process = this.nodockerRun(options);
+        if (options.timeout) {
+            var timer = setTimeout(function () {
+                process.kill();
+            }, options.timeout);
+            process.on("close", function () {
+                clearTimeout(timer);
+            });
+        }
+        return process;
     },
 
     nodockerRun: function (options) {

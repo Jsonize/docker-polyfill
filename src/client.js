@@ -32,6 +32,14 @@ module.exports = {
             myData[key] = data[key];
         const clientProcess = createPseudoProcess();
         const socket = new Net.Socket();
+        var killed = false;
+        clientProcess.kill = function () {
+            if (killed)
+                return;
+            killed = true;
+            socket.end();
+            clientProcess.emit("close", null);
+        };
         const components = proxy.split(":");
         var stdin = "";
         var called = false;
@@ -56,6 +64,8 @@ module.exports = {
                     resultData += data;
                 });
                 socket.on("end", function () {
+                    if (killed)
+                        return;
                     const result = JSON.parse(resultData);
                     clientProcess.stderr.push(result.stderr);
                     clientProcess.stderr.push(null);
