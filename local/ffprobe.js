@@ -1,7 +1,7 @@
 #!/usr/local/bin/node
 
 const Runner = require(__dirname + "/../src/runner.js");
-const local = JSON.parse(require('fs').readFileSync('config.json'));
+const local = JSON.parse(require('fs').readFileSync(__dirname + '/config.json'));
 
 Runner.pipeProcesses(Runner.dockerRun({
     container: "jrottenberg/ffmpeg",
