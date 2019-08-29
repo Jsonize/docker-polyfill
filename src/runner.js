@@ -17,6 +17,7 @@ module.exports = {
             process = this.nodockerRun(options);
         if (options.timeout) {
             var timer = setTimeout(function () {
+                process.emit("timeout");
                 process.kill();
             }, options.timeout);
             process.on("close", function () {
