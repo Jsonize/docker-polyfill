@@ -20,7 +20,8 @@ module.exports = {
         var files = {};
         args.forEach(function (arg) {
             while (match = FilenameRegex.exec(arg))
-                files[match[1]] = true;
+								if (arg.indexOf("://") === -1)
+										files[match[1]] = true;
         });
         var result = [];
         for (var file in files)
