@@ -45,6 +45,8 @@ module.exports = {
         const container = options.container;
         // command can be undefined
         const command = options.command;
+        // dockerUser can be undefined
+        const dockerUser = options.dockerUser;
         var argv = options.argv || [];
         // replace arguments with replacement hash
         if (options.replaceArguments) {
@@ -68,6 +70,10 @@ module.exports = {
         const mountParameters = Files.generateMountParameters(fileMounts);
         // generate command line
         var dockerArgs = ["run", "--rm"];
+        if (dockerUser) {
+            dockerArgs.push("--user");
+            dockerArgs.push(dockerUser);
+        }
         dockerArgs = dockerArgs.concat(mountParameters);
         if (command) {
             dockerArgs.push("--entrypoint");
